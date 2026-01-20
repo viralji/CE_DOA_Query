@@ -1,3 +1,5 @@
+const path = require('path');
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
@@ -5,8 +7,12 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
-  // Ensure path aliases work
   webpack: (config) => {
+    // Explicitly resolve @ alias
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname),
+    };
     return config;
   },
 }
