@@ -5,6 +5,10 @@ const nextConfig = {
       bodySizeLimit: '10mb',
     },
   },
+  // Ensure path aliases work
+  webpack: (config) => {
+    return config;
+  },
 }
 
 module.exports = nextConfig
