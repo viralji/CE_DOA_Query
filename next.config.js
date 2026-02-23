@@ -6,6 +6,7 @@ const nextConfig = {
     serverActions: {
       bodySizeLimit: '10mb',
     },
+    instrumentationHook: true,
   },
   webpack: (config) => {
     // Explicitly resolve @ alias

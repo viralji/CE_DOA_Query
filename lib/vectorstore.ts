@@ -10,6 +10,7 @@ const EMBEDDINGS_FILE = path.join(INDEX_DIR, "embeddings.json");
 const METADATA_FILE = path.join(INDEX_DIR, "metadata.json");
 
 let vectorStore: MemoryVectorStore | null = null;
+let initPromise: Promise<MemoryVectorStore> | null = null;
 let embeddings: GoogleEmbeddingsV1Beta | null = null;
 
 export async function getEmbeddings(): Promise<GoogleEmbeddingsV1Beta> {
@@ -88,13 +89,22 @@ export async function loadVectorStore(): Promise<MemoryVectorStore | null> {
 }
 
 export async function getVectorStore(): Promise<MemoryVectorStore> {
-  if (!vectorStore) {
-    vectorStore = await loadVectorStore();
-    if (!vectorStore) {
-      throw new Error("Vector store not initialized. Please run the process-doa script first.");
-    }
+  if (vectorStore) return vectorStore;
+
+  if (!initPromise) {
+    initPromise = loadVectorStore().then((store) => {
+      if (!store) {
+        throw new Error("Vector store not initialized. Please run the process-doa script first.");
+      }
+      vectorStore = store;
+      return store;
+    }).catch((err) => {
+      initPromise = null; // allow retry on next call
+      throw err;
+    });
   }
-  return vectorStore;
+
+  return initPromise;
 }
 
 export function clearVectorStore() {

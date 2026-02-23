@@ -113,9 +113,23 @@ Assistant:`;
   // Get response from LLM
   const response = await chain.llm.invoke(systemPrompt);
 
+  // Safely extract text — Gemini 2.5 Pro (thinking model) can return content
+  // as an array of parts rather than a plain string
+  const rawContent = response.content;
+  const responseText: string =
+    typeof rawContent === "string"
+      ? rawContent
+      : Array.isArray(rawContent)
+      ? rawContent
+          .map((part: any) =>
+            typeof part === "string" ? part : part?.text ?? ""
+          )
+          .join("")
+      : String(rawContent);
+
   // Update chat history
   chain.chatHistory.push(new HumanMessage(question));
-  chain.chatHistory.push(new AIMessage(response.content as string));
+  chain.chatHistory.push(new AIMessage(responseText));
 
   // Keep only last 10 messages to avoid token limits
   if (chain.chatHistory.length > 10) {
@@ -123,7 +137,7 @@ Assistant:`;
   }
 
   return {
-    text: response.content as string,
+    text: responseText,
     sourceDocuments: docs,
   };
 }

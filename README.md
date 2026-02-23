@@ -200,7 +200,26 @@ Check that your `.env` file exists and contains `GOOGLE_API_KEY`
 - MemoryVectorStore is used for simplicity but doesn't persist between restarts
 - Excel file should be placed in root directory before running `process-doa`
 
-## Documentation
+## Deployment
 
-- **[DEPLOYMENT.md](./DEPLOYMENT.md)** - Complete deployment guide for production
-- **[CODE_REVIEW.md](./CODE_REVIEW.md)** - Code review and defect analysis
+### New Deployment (Fresh Server)
+```bash
+./New_Deploy.sh
+```
+This script will:
+- Install all prerequisites (Node.js, PM2, Nginx)
+- Clone repository
+- Install dependencies
+- Upload .env and Excel file
+- Process data and build
+- Start application with PM2
+
+### Re-Deployment (Updates)
+```bash
+./Re_Deploy.sh
+```
+This script will:
+- Pull latest code
+- Update dependencies
+- Rebuild application
+- Restart PM2
