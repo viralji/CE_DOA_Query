@@ -11,7 +11,7 @@ export class GoogleEmbeddingsV1Beta extends Embeddings {
   private model: string;
 
   constructor(params: { apiKey: string; modelName?: string }) {
-    super();
+    super({});
     this.apiKey = params.apiKey;
     this.model = params.modelName?.replace(/^models\//, "") ?? "text-embedding-004";
   }
