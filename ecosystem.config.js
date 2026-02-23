@@ -3,7 +3,7 @@ module.exports = {
     name: 'doa-chatbot',
     script: 'npm',
     args: 'start',
-    cwd: process.cwd(),
+    cwd: '/var/www/CE_DOA_Query',
     instances: 1,
     exec_mode: 'fork',
     env: {

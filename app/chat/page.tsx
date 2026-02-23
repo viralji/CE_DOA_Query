@@ -161,12 +161,18 @@ export default function ChatPage() {
     setInputMessage('');
     setIsLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 90000); // 90s for first request (vector load + LLM)
+
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: userMessage.text }),
+        signal: controller.signal,
+        credentials: 'same-origin',
       });
+      clearTimeout(timeoutId);
 
       if (response.ok) {
         const data = await response.json();
@@ -179,20 +185,30 @@ export default function ChatPage() {
         };
         setMessages((prev) => [...prev, botMessage]);
       } else {
-        const errorData = await response.json();
+        let errText = `Error ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errText = errorData.error || errText;
+        } catch {
+          errText = response.statusText || errText;
+        }
         const errorMessage: Message = {
           id: (Date.now() + 1).toString(),
-          text: `Sorry, I encountered an error: ${errorData.error || 'Unknown error'}`,
+          text: `Sorry, I encountered an error: ${errText}`,
           sender: 'bot',
           timestamp: new Date(),
         };
         setMessages((prev) => [...prev, errorMessage]);
       }
-    } catch (error) {
+    } catch (error: unknown) {
+      clearTimeout(timeoutId);
       console.error('Network error:', error);
+      const isTimeout = error instanceof Error && error.name === 'AbortError';
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
-        text: "Sorry, I'm having trouble connecting to the server. Please try again.",
+        text: isTimeout
+          ? "The request took too long. The server may be busy loading data. Please try again in a moment."
+          : "Sorry, I'm having trouble connecting to the server. Please check your connection and try again.",
         sender: 'bot',
         timestamp: new Date(),
       };

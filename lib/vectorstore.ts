@@ -1,26 +1,26 @@
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai";
 import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { Document } from "langchain/document";
 import * as fs from "fs";
 import * as path from "path";
 import { DOAChunk } from "./process-excel";
+import { GoogleEmbeddingsV1Beta } from "./google-embeddings-v1beta";
 
 const INDEX_DIR = path.join(process.cwd(), "data/faiss-index");
 const EMBEDDINGS_FILE = path.join(INDEX_DIR, "embeddings.json");
 const METADATA_FILE = path.join(INDEX_DIR, "metadata.json");
 
 let vectorStore: MemoryVectorStore | null = null;
-let embeddings: GoogleGenerativeAIEmbeddings | null = null;
+let embeddings: GoogleEmbeddingsV1Beta | null = null;
 
-export async function getEmbeddings(): Promise<GoogleGenerativeAIEmbeddings> {
+export async function getEmbeddings(): Promise<GoogleEmbeddingsV1Beta> {
   if (!embeddings) {
     const apiKey = process.env.GOOGLE_API_KEY;
     if (!apiKey) {
       throw new Error("GOOGLE_API_KEY environment variable is not set");
     }
-    embeddings = new GoogleGenerativeAIEmbeddings({
-      modelName: "models/embedding-001",
-      apiKey: apiKey,
+    embeddings = new GoogleEmbeddingsV1Beta({
+      apiKey,
+      modelName: "gemini-embedding-001",
     });
   }
   return embeddings;
